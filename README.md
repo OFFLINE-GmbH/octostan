@@ -2,6 +2,13 @@
 
 PHPStan for October CMS
 
+
+## Work in progress
+
+* [X] Detection of relations via October's model properties
+* [X] Checks for existing relations in `->with()`
+* [ ] Returns October Query Builder for all Eloquent query methods
+
 ## Installation
 
 Install this package via composer:
