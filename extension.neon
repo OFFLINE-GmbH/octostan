@@ -2,6 +2,10 @@ includes:
     - ../../nunomaduro/larastan/extension.neon
 
 parameters:
+    ignoreErrors:
+        # Ignore PHPStan missing relations, we do our own checks.
+        - '#Relation .* is not found in .* model.$#'
+
     databaseMigrationsPath:
         - modules/backend/database/migrations
         - modules/cms/database/migrations
@@ -19,5 +23,6 @@ services:
         class: OFFLINE\Octostan\Rules\RelationExistenceRule
         tags:
             - phpstan.rule
+
 rules:
     - OFFLINE\Octostan\Rules\RelationExistenceRule

@@ -7,17 +7,21 @@ use OFFLINE\Octostan\Helpers\RelationHelper;
 use PhpParser\Node;
 use PhpParser\Node\Expr\MethodCall;
 use PHPStan\Analyser\Scope;
+use PHPStan\Reflection\ClassReflection;
 use PHPStan\Reflection\ParametersAcceptorSelector;
 use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleErrorBuilder;
 use PHPStan\Type\Constant\ConstantArrayType;
 use PHPStan\Type\Constant\ConstantStringType;
 use PHPStan\Type\GeneralizePrecision;
+use PHPStan\Type\Generic\GenericObjectType;
 use PHPStan\Type\IntegerType;
 use PHPStan\Type\ObjectType;
 use PHPStan\Type\Type;
 use PHPStan\Type\TypeTraverser;
 use PHPStan\Type\UnionType;
+use ReflectionException;
+use PHPStan\Reflection\MissingPropertyFromReflectionException;
 
 class RelationExistenceRule extends \NunoMaduro\Larastan\Rules\RelationExistenceRule
 {
@@ -67,9 +71,64 @@ class RelationExistenceRule extends \NunoMaduro\Larastan\Rules\RelationExistence
             $relations = $valueType->getKeyTypes();
         }
 
-        // TODO: Implement relation checks here
+        $calledOnNode = $node instanceof MethodCall ? $node->var : $node->class;
+        $modelName = $calledOnNode->class->toCodeString();
 
-        return [];
+        $type = new ObjectType($modelName);
+
+        $classReflection = $type->getClassReflection();
+        if (!$classReflection) {
+            return [];
+        }
+
+        $closure = function (ClassReflection $classReflection, Node $node, string $relationName) {
+            try {
+                RelationHelper::findRelation($classReflection, $relationName, $node);
+            } catch (MissingPropertyFromReflectionException|ReflectionException $ex) {
+                return [
+                    $this->getRuleError($relationName, $classReflection, $node),
+                ];
+            }
+            return [];
+        };
+
+        $errors = [];
+
+        foreach ($relations as $relationType) {
+            $relationName = explode(':', $relationType->getValue())[0];
+
+            // Nested relations.
+            if (str_contains($relationName, '.')) {
+
+                $relations = explode('.', $relationName);
+
+                foreach ($relations as $relation) {
+                    $result = $closure($classReflection, $node, $relation);
+                    if (count($result) > 0) {
+                        return $result;
+                    }
+
+                    // Move along the relations path. Replace the $classReflection with the related model.
+                    $instance = new $modelName;
+                    try {
+                        $relatedModel = $instance->$relation()->make();
+                        $type = new ObjectType(get_class($relatedModel));
+                        $classReflection = $type->getClassReflection();
+                    } catch (\Exception $ex) {
+                        return [
+                            $this->getRuleError($relation, $classReflection, $node),
+                        ];
+                    }
+
+                }
+
+                return $errors;
+            }
+
+            $errors += $closure($classReflection, $node, $relationName);
+        }
+
+        return $errors;
     }
 
     private function getRuleError(
@@ -77,7 +136,7 @@ class RelationExistenceRule extends \NunoMaduro\Larastan\Rules\RelationExistence
         \PHPStan\Reflection\ClassReflection $modelReflection,
         Node $node
     ): \PHPStan\Rules\RuleError {
-        return RuleErrorBuilder::message(sprintf("Relation '%s' is not found in %s model.", $relationName,
+        return RuleErrorBuilder::message(sprintf("Relation '%s' is not defined on %s model.", $relationName,
             $modelReflection->getName()))
             ->identifier('rules.relationExistence')
             ->line($node->getAttribute('startLine'))
