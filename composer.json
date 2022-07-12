@@ -1,0 +1,22 @@
+{
+    "name": "offline/octostan",
+    "description": "PHPStan for October CMS",
+    "type": "library",
+    "require": {
+        "php": "^8.0",
+        "nunomaduro/larastan": "^2.0.0",
+        "october/rain": "^3.0.0"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "OFFLINE\\Octostan\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Tobias Kündig",
+            "email": "tobias@offline.ch"
+        }
+    ]
+}

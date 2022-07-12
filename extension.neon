@@ -1,0 +1,23 @@
+includes:
+    - ../../nunomaduro/larastan/extension.neon
+
+parameters:
+    databaseMigrationsPath:
+        - modules/backend/database/migrations
+        - modules/cms/database/migrations
+        - modules/system/database/migrations
+        - modules/media/database/migrations
+        - modules/tailor/database/migrations
+        - plugins/*/*/updates
+
+services:
+    -
+        class: OFFLINE\Octostan\Extensions\OctoberRelationsExtension
+        tags:
+            - phpstan.broker.propertiesClassReflectionExtension
+    -
+        class: OFFLINE\Octostan\Rules\RelationExistenceRule
+        tags:
+            - phpstan.rule
+rules:
+    - OFFLINE\Octostan\Rules\RelationExistenceRule
