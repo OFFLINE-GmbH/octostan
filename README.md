@@ -2,6 +2,22 @@
 
 PHPStan for October CMS
 
+## Installation
+
+Install this package via composer:
+
+```
+composer require offline/octoston
+```
+
+Create a `phpstan.neon` file in your project. You can find an example below.
+
+To run PHPStan, use this command:
+
+```bash
+./vendor/bin/phpstan analyze 
+```
+
 ## Example phpstan.neon
 
 ```neon
@@ -17,13 +33,7 @@ parameters:
         - plugins/**/partials
         - plugins/**/controllers/**/*.php
         - plugins/**/formwidgets/**/partials/*.php
+        
     paths:
-        - plugins/your-vendor-name
-
-services:
-    - class: OFFLINE\Octostan\Extensions\OctoberRelationsExtension
-      tags:
-          - phpstan.broker.propertiesClassReflectionExtension
-
-
+        - plugins/your-vendor-name # Change this!
 ```
