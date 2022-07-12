@@ -72,6 +72,9 @@ class RelationExistenceRule extends \NunoMaduro\Larastan\Rules\RelationExistence
         }
 
         $calledOnNode = $node instanceof MethodCall ? $node->var : $node->class;
+        if (!$calledOnNode || !$calledOnNode->class) {
+            return [];
+        }
         $modelName = $calledOnNode->class->toCodeString();
 
         $type = new ObjectType($modelName);
