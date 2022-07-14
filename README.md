@@ -2,6 +2,14 @@
 
 PHPStan for October CMS
 
+## State of this library
+
+This is currently just a proof of concept. Getting PHPStan to fully integrate with October CMS
+will require a lot of work and a lot of custom code. `octostan` is currently (July 2022) the most
+optimized PHPStan configuration for October CMS but has a long way to go to become actually usuable.
+
+Contributions are welcome!
+
 
 ## Work in progress
 
