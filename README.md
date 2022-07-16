@@ -23,7 +23,7 @@ Contributions are welcome!
 Install this package via composer:
 
 ```
-composer require offline/octostan
+composer require offline/octostan --dev
 ```
 
 Create a `phpstan.neon` file in your project. You can find an example below.
